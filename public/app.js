@@ -1,7 +1,8 @@
+import { calendarEntries, calendarHTML, overlapsDay } from './calendar.js';
 import { artistsHTML } from './artists.js';
 import { historyHTML } from './history.js';
 import { hotel, food, sources, suggested, guideHTML } from './guide.js';
-import { t, setupLanguage } from './i18n.js';
+import { searchTranslation, setupLanguage } from './i18n.js';
 
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -14,7 +15,7 @@ const groups={exhibitions:['Exhibition','Project','Collection','Experience'],mus
 function read(key,fallback) {try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}}
 let saved=read('linz-weekender-plan-v1',[]); if(!Array.isArray(saved)) saved=[];
 let data, events=[], sessions=new Map(), byId=new Map(), byPhoto=new Map();
-let state={view:'explore',day:'2026-09-11',filter:'picks',query:'',category:'all',hub:'all',venue:null,limit:30,foodLayer:false};
+let state={display:'list',from:0,to:1440,kind:'all',view:'explore',day:'2026-09-11',filter:'picks',query:'',category:'all',hub:'all',venue:null,limit:30,foodLayer:false};
 let map,markers=L.layerGroup(),foodMarkers=L.layerGroup(),selectedPin=null,userMarker=null;
 let toastTimer;
 function toast(text){$('#toast').textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3000);}
@@ -24,7 +25,7 @@ function opening(event,session){return session.flexible && ['Exhibition','Projec
 function range(session){return `${clock(session.start)}–${clock(session.end)}${session.end.slice(0,10)!==session.day?' (+1 day)':''}`;}
 function isSaved(id){return saved.some(s=>s.sessionId===id);}
 function directions(lat,lng,mode='transit',origin=null){const u=new URL('https://www.google.com/maps/dir/');u.searchParams.set('api','1');u.searchParams.set('destination',`${lat},${lng}`);u.searchParams.set('travelmode',mode);if(origin)u.searchParams.set('origin',origin);return u.href;}
-function sessionList(event){return event.sessions.filter(s=>s.day===state.day&&(state.hub==='all'||s.hub===state.hub)&&(!state.venue||s.venueId===state.venue));}
+function sessionList(event){return event.sessions.filter(s=>(state.display==='calendar'?overlapsDay(s,state.day):s.day===state.day)&&(state.hub==='all'||s.hub===state.hub)&&(!state.venue||s.venueId===state.venue));}
 function matching(){return events.filter(e=>{
   if(!sessionList(e).length)return false;
   if(state.filter==='picks'&&!e.curation)return false;
@@ -32,7 +33,7 @@ function matching(){return events.filter(e=>{
   if(state.filter==='free'&&!sessionList(e).some(s=>s.hub==='MED CAMPUS'))return false;
   if(state.category!=='all'&&!groups[state.category]?.includes(e.category))return false;
   const query=state.query.toLowerCase().trim();
-  return !query||[e.title,t(e.title),e.artists,e.excerpt,t(e.curation?.summary||''),e.curation?.background,t(e.curation?.background||''),...e.tags,...e.tags.map(t),...e.sessions.map(s=>s.venue+' '+s.room)].join(' ').toLowerCase().includes(query);
+  return !query||[e.title,searchTranslation(e.title),e.artists,e.excerpt,searchTranslation(e.excerpt),searchTranslation(e.curation?.summary||''),e.curation?.background,searchTranslation(e.curation?.background||''),...e.tags,...e.tags.map(searchTranslation),...e.sessions.map(s=>s.venue+' '+s.room)].join(' ').toLowerCase().includes(query);
 }).sort((a,b)=>state.filter==='picks'?(a.curation.rank-b.curation.rank):sessionList(a)[0].start.localeCompare(sessionList(b)[0].start)||a.title.localeCompare(b.title));}
 
 function card(event,index){const list=sessionList(event).filter(s=>state.filter!=='free'||s.hub==='MED CAMPUS');const s=list[0];const compact=state.filter!=='picks';
@@ -44,9 +45,11 @@ function card(event,index){const list=sessionList(event).filter(s=>state.filter!
  <p class="card-description">${esc(event.curation?.summary||event.excerpt)}</p>
  <div class="card-footer"><button class="venue-button" data-venue="${s.venueId}" data-session="${s.id}"><i style="--dot:${colours[s.hub]||colours['SATELLITE LOCATIONS']}"></i>${esc(s.venue)}</button><button class="card-more" data-detail="${s.id}">Take a look ↗</button></div></div></article>`;
 }
-function renderEvents(){const list=matching();$('#events').innerHTML=list.length?list.slice(0,state.limit).map(card).join('')+(list.length>state.limit?`<button class="load-more" id="load-more">Show more · ${list.length-state.limit} remaining ↓</button>`:''):`<div class="empty-state">No events match this combination.<br><button class="text-button" id="clear-filters">Reset filters ↗</button></div>`;
+function syncCalendarControls(){for(const field of ['from','to','kind'])document.querySelector(`[data-calendar-field="${field}"]`).value=String(state[field]);}
+function setDisplay(display){state.display=display;document.querySelector('.explorer').classList.toggle('calendar-active',display==='calendar');$('#calendar-controls').hidden=display!=='calendar';document.querySelectorAll('[data-display]').forEach(b=>{b.classList.toggle('selected',b.dataset.display===display);b.setAttribute('aria-pressed',b.dataset.display===display)});renderEvents();if(display==='list')requestAnimationFrame(()=>map?.invalidateSize());}
+function renderEvents(){const list=matching();const calendarRows=state.display==='calendar'?calendarEntries(list,state):[];const projectCount=state.display==='calendar'?new Set(calendarRows.map(x=>x.event.id)).size:list.length;$('#events').innerHTML=state.display==='calendar'?calendarHTML(calendarRows,{...state,esc,isSaved,range}):list.length?list.slice(0,state.limit).map(card).join('')+(list.length>state.limit?`<button class="load-more" id="load-more">Show more · ${list.length-state.limit} remaining ↓</button>`:''):`<div class="empty-state">No events match this combination.<br><button class="text-button" id="clear-filters">Reset filters ↗</button></div>`;
  const labels={picks:'A few places to start',all:'Follow your curiosity',highlights:'Highlighted by the festival',free:'Explore MED CAMPUS for free'};
- $('#list-context').innerHTML=`<b>${state.venue?'At this venue':labels[state.filter]}</b><span>${list.length} ${list.length===1?'project':'projects'}${state.venue?' · <button class="clear-filter" id="clear-venue">Clear venue ×</button>':''}</span>`;
+ $('#list-context').innerHTML=`<b>${state.venue?'At this venue':labels[state.filter]}</b><span>${projectCount} ${projectCount===1?'project':'projects'}${state.venue?' · <button class="clear-filter" id="clear-venue">Clear venue ×</button>':''}</span>`;
  document.querySelectorAll('[data-day]').forEach(b=>{b.classList.toggle('active',b.dataset.day===state.day);b.setAttribute('aria-pressed',b.dataset.day===state.day)});
  document.querySelectorAll('[data-filter]').forEach(b=>{b.classList.toggle('selected',b.dataset.filter===state.filter);b.setAttribute('aria-pressed',b.dataset.filter===state.filter)});
  updateMap(list);$('#plan-count').textContent=saved.length;
@@ -65,7 +68,7 @@ function updateMap(list){if(!map)return;markers.clearLayers();const venues=new M
  const first=[...projects.values()][0];marker.bindPopup(`<b class="map-venue-title">${esc(s.venue)}</b><br><span>${esc(s.address)}</span><br><small>${projects.size} matching ${projects.size===1?'project':'projects'}</small><br><button data-map-venue="${id}">Explore this venue →</button><br><a href="${directions(s.lat,s.lng,'transit',`${hotel.lat},${hotel.lng}`)}" target="_blank" rel="noreferrer">Transit from hotel ↗</a>`);}
 }
 function showFoodMarkers(){foodMarkers.clearLayers();if(!state.foodLayer)return;food.forEach(f=>L.marker([f.lat,f.lng],{icon:L.divIcon({className:'',html:`<div class="place-pin">${f.kind.includes('Restaurant')||f.kind.includes('restaurant')?'♧':'☕'}</div>`,iconSize:[26,26]}),title:f.name}).addTo(foodMarkers).bindPopup(`<b>${esc(f.name)}</b><br>${esc(f.address)}<br><small>${esc(f.hours)}</small><br><a href="${directions(f.lat,f.lng,'walking')}" target="_blank" rel="noreferrer">Walking directions ↗</a><br><a href="${f.source}" target="_blank" rel="noreferrer">Official information ↗</a>`));$('#food-layer').setAttribute('aria-pressed',state.foodLayer);}
-function focusVenue(session){selectedPin=session.venueId;nav('explore',false);if(window.innerWidth<=600){$('#map-panel').classList.add('mobile-open');$('#mobile-map').textContent='Hide map ×';}map.invalidateSize();map.flyTo([session.lat,session.lng],16,{duration:.6});updateMap(matching());markers.eachLayer(m=>{if(m.getLatLng().lat===session.lat&&m.getLatLng().lng===session.lng)m.openPopup()});if(window.innerWidth<=600)$('#map-panel').scrollIntoView({behavior:'smooth',block:'start'});}
+function focusVenue(session){if(state.display==='calendar'){setDisplay('list');}selectedPin=session.venueId;nav('explore',false);if(window.innerWidth<=600){$('#map-panel').classList.add('mobile-open');$('#mobile-map').textContent='Hide map ×';}map.invalidateSize();map.flyTo([session.lat,session.lng],16,{duration:.6});updateMap(matching());markers.eachLayer(m=>{if(m.getLatLng().lat===session.lat&&m.getLatLng().lng===session.lng)m.openPopup()});if(window.innerWidth<=600)$('#map-panel').scrollIntoView({behavior:'smooth',block:'start'});}
 
 function toggleSave(id,overrides={}){const pair=sessions.get(Number(id));if(!pair)return;const {event,session}=pair;
  if(isSaved(session.id)){saved=saved.filter(s=>s.sessionId!==session.id);toast('Removed from your weekend.');}else{saved.push({eventId:event.id,sessionId:session.id,start:overrides.start||session.start,duration:overrides.duration||duration(event,session)});toast('Saved to your weekend. Remember to book if required.');}
@@ -77,10 +80,10 @@ function openDetail(id,open=true){const pair=sessions.get(Number(id));if(!pair)r
  const admission=c?.admission||(s.hub==='MED CAMPUS'?'Free admission at MED CAMPUS. Individual sessions may still require registration.':'The public planner does not provide a ticket category for this entry. Check the official page for admission and capacity; do not assume that no price means free.');
  $('#event-detail').innerHTML=`<div class="detail-image">${e.image?`<img src="${esc(assetUrl(e.image))}" alt="${esc(e.title)}">`:''}<button class="close-dialog" aria-label="Close event details" id="close-dialog">×</button></div><div class="detail-photo-credit">${esc(e.credit||'Image: official festival programme')}</div>
  <div class="detail-body"><span class="detail-category">${esc(e.category.toUpperCase())}${e.highlight?' · OFFICIAL HIGHLIGHT':''}</span><h2 id="detail-title">${esc(e.title)}</h2>${e.artists?`<div class="artist">${esc(e.artists)}</div>`:''}
- ${c?`<div class="detail-summary">${esc(c.summary)}</div>`:`<blockquote>“${esc(e.excerpt)}”<br><a href="${safeURL(e.source)}" target="_blank" rel="noreferrer">Official programme excerpt ↗</a></blockquote>`}
+ ${c?`<div class="detail-summary">${esc(c.summary)}</div>`:`<blockquote><span>${esc(e.excerpt)}</span><br><a href="${safeURL(e.source)}" target="_blank" rel="noreferrer">Official programme excerpt ↗</a></blockquote>`}
  <div class="detail-facts"><div><small>WHEN · LINZ LOCAL TIME</small><b>${dateLabel(s.day)}<br>${range(s)}</b></div><div><small>${opening(e,s)?'DROP-IN EXHIBITION':'PROGRAMME / SESSION'}</small><b>${opening(e,s)?`Suggested visit: ${duration(e,s)} minutes`:`${s.flexible?'Programme window':'Scheduled start'} · ${s.language||'Language not specified'}`}</b></div><div><small>WHERE</small><b>${esc(s.venue)}<br>${esc(s.address)}</b></div><div><small>ROOM / MEETING POINT</small><b>${esc(s.room)}</b></div></div>
  ${e.sessions.length>1?`<label for="session-select" style="font-size:11px">Choose a day or session</label><select class="session-select" id="session-select">${e.sessions.map(x=>`<option value="${x.id}" ${x.id===s.id?'selected':''}>${dateLabel(x.day)} · ${range(x)} · ${esc(x.venue)}</option>`).join('')}</select>`:''}
- ${c?.availability?`<div class="notice"><b>${esc(c.availability)}</b><br>Latest official event-page notice. Only attend with a confirmed place; check the source for changes.</div>`:''}<h3>A little background</h3><p>${esc(background)}</p><div class="detail-tags">${e.tags.slice(0,8).map(t=>`<span>${esc(t)}</span>`).join('')}</div>
+ ${c?.availability?`<div class="notice"><b>${esc(c.availability)}</b><br>Latest official event-page notice. Only attend with a confirmed place; check the source for changes.</div>`:''}<h3>A little background</h3><p>${c?esc(background):`${e.artists?`<span>Created or presented by</span> <span>${esc(e.artists)}</span>。 `:''}${e.tags.length?`<span>Related themes</span>：${e.tags.slice(0,3).map(tag=>`<span>${esc(tag)}</span>`).join('、')}。 `:''}<span>${esc(e.category==='Project'?'This entry is an individual work within the wider programme. Use the room and venue information to find it, and allow time to explore its surrounding exhibition.':'See the official listing for the full programme context and contributor biographies.')}</span>`}</p><div class="detail-tags">${e.tags.slice(0,8).map(t=>`<span>${esc(t)}</span>`).join('')}</div>
  <h3>Make the most of it</h3><p>${esc(info)}</p><h3>Tickets & booking</h3><p><span>${esc(admission)}</span>${s.registration?' <b>Registration is required; see the official event listing.</b>':''}${s.arrival?` Arrive ${s.arrival} minutes early.`:''}</p>
  <div class="detail-actions"><button class="primary-button orange-button" data-save="${s.id}">${isSaved(s.id)?'✓ Saved · remove':'+ Add to my weekend'}</button>${s.lat?`<a class="outline-button" href="${directions(s.lat,s.lng,'transit',`${hotel.lat},${hotel.lng}`)}" target="_blank" rel="noreferrer">Transit from hotel ↗</a><button class="outline-button" data-detail-map="${s.id}">On the map ↗</button>`:''}${s.booking&&s.registration?`<a class="outline-button" href="${safeURL(s.booking)}" target="_blank" rel="noreferrer">Register / book ↗</a>`:''}</div>
  <p class="detail-source"><a href="${safeURL(e.source)}" target="_blank" rel="noreferrer">Full official event & latest updates ↗</a>${c?.sourceExtra?` · <a href="${c.sourceExtra}" target="_blank" rel="noreferrer">Ticket conditions ↗</a>`:''}<br>Saving is a personal reminder, not a reservation. Background and visit lengths are editorial guidance.</p></div>`;
@@ -88,7 +91,7 @@ function openDetail(id,open=true){const pair=sessions.get(Number(id));if(!pair)r
  if(open)$('#event-dialog').scrollTop=0;
  if(!open)$('#event-detail [data-save]')?.focus();
 }
-function resetFilters(){state={...state,filter:'all',query:'',category:'all',hub:'all',venue:null,limit:30};$('#search').value='';$('#category').value='all';$('#hub').value='all';renderEvents();}
+function resetFilters(){state={...state,from:0,to:1440,kind:'all',filter:'all',query:'',category:'all',hub:'all',venue:null,limit:30};$('#search').value='';$('#category').value='all';$('#hub').value='all';syncCalendarControls();renderEvents();}
 function nav(view,scroll=true){if(!['explore','plan','food','guide','history','artists'].includes(view))view='explore';state.view=view;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==view+'-view'));document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.nav===view));if(view==='plan')renderPlan();if(view==='food')renderFood();if(view==='guide')renderGuide();if(view==='artists')$('#artists-view').innerHTML=artistsHTML(events,esc);if(view==='history')$('#history-view').innerHTML=historyHTML(esc);if(view==='explore')setTimeout(()=>map?.invalidateSize(),0);history.replaceState(null,'','#'+view);if(scroll)window.scrollTo({top:0,behavior:'smooth'});}
 function stopEvent(stop,day){const e=byPhoto.get(stop.photo);const s=e?.sessions.find(s=>s.day===day);return e&&s?{event:e,session:s}:null;}
 function renderPlan(){const plan=saved.map(x=>({...x,pair:sessions.get(x.sessionId)})).filter(x=>x.pair).sort((a,b)=>a.start.localeCompare(b.start));
@@ -118,6 +121,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('button,a.brand')
  if(b.dataset.historyEvent){const event=byPhoto.get(Number(b.dataset.historyEvent));const session=event?.sessions.find(s=>s.day===state.day)||event?.sessions[0];if(session){nav('explore');openDetail(session.id);}return;}
 
  if(b.classList.contains('brand')){nav('explore');return;}
+ if(b.dataset.display){setDisplay(b.dataset.display);return;}
+ if(b.id==='calendar-reset'){state.from=0;state.to=1440;state.kind='all';syncCalendarControls();renderEvents();return;}
  if(b.dataset.day){state.day=b.dataset.day;state.venue=null;state.limit=30;renderEvents();$('#events').scrollTop=0;return;}
  if(b.dataset.filter){state.filter=b.dataset.filter;state.limit=30;renderEvents();$('#events').scrollTop=0;return;}
  if(b.dataset.save){toggleSave(Number(b.dataset.save));return;}
@@ -144,7 +149,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button,a.brand')
  case 'locate':if(!navigator.geolocation){toast('Location is unavailable. Use the directions links.');break;}b.disabled=true;navigator.geolocation.getCurrentPosition(p=>{b.disabled=false;const ll=[p.coords.latitude,p.coords.longitude];if(userMarker)map.removeLayer(userMarker);userMarker=L.circleMarker(ll,{radius:7,color:'#fff',fillColor:'#3976a8',fillOpacity:1,weight:3}).addTo(map).bindPopup('Your current location');map.flyTo(ll,15);},()=>{b.disabled=false;toast('Location could not be shared. Venue directions still work.');},{timeout:10000,maximumAge:60000});break;
  }
 });
-document.addEventListener('change',e=>{const el=e.target;if(el.id==='category'||el.id==='hub'){state[el.id]=el.value;state.venue=null;state.limit=30;renderEvents();}if(el.id==='session-select')openDetail(Number(el.value));if(el.dataset.visitTime||el.dataset.visitDuration){const id=Number(el.dataset.visitTime||el.dataset.visitDuration);const entry=saved.find(s=>s.sessionId===id);if(!entry)return;if(el.dataset.visitTime&&/^\d{2}:\d{2}$/.test(el.value))entry.start=sessions.get(id).session.day+'T'+el.value+':00+02:00';if(el.dataset.visitDuration){const v=Number(el.value);if(v>=5&&v<=600)entry.duration=v;}persist();renderPlan();}});
+document.addEventListener('change',e=>{const el=e.target;if(el.dataset.calendarField){state[el.dataset.calendarField]=el.dataset.calendarField==='kind'?el.value:Number(el.value);renderEvents();return;}if(el.id==='category'||el.id==='hub'){state[el.id]=el.value;state.venue=null;state.limit=30;renderEvents();}if(el.id==='session-select')openDetail(Number(el.value));if(el.dataset.visitTime||el.dataset.visitDuration){const id=Number(el.dataset.visitTime||el.dataset.visitDuration);const entry=saved.find(s=>s.sessionId===id);if(!entry)return;if(el.dataset.visitTime&&/^\d{2}:\d{2}$/.test(el.value))entry.start=sessions.get(id).session.day+'T'+el.value+':00+02:00';if(el.dataset.visitDuration){const v=Number(el.value);if(v>=5&&v<=600)entry.duration=v;}persist();renderPlan();}});
 $('#search').addEventListener('input',e=>{state.query=e.target.value;state.limit=30;if(state.query&&state.filter==='picks')state.filter='all';renderEvents();});
 document.addEventListener('keydown',e=>{if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)&&!$('#event-dialog').open){e.preventDefault();nav('explore',false);$('#search').focus();}});
 $('#event-dialog').addEventListener('click',e=>{if(e.target===$('#event-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});

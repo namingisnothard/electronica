@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node server.mjs",
     "start": "node server.mjs",
-    "check": "node --check public/artists.js && node --check public/history.js && node --check public/app.js && node --check public/guide.js && node --check public/i18n.js && node --check public/zh.js && node --check public/zh-content.js && node scripts/check-data.mjs",
-    "refresh": "node scripts/refresh-programme.mjs"
+    "check": "node --check public/artists.js && node --check public/history.js && node --check public/app.js && node --check public/guide.js && node --check public/i18n.js && node --check public/zh.js && node --check public/zh-content.js && node scripts/check-data.mjs && node --check public/calendar.js && node --check public/zh-programme.js && node --check public/zh-catalogue-ui.js && node --test scripts/calendar.test.mjs scripts/translations.test.mjs",
+    "refresh": "node scripts/refresh-programme.mjs",
+    "build:translations": "node scripts/build-programme-zh.mjs"
   }
 }

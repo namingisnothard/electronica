@@ -269,3 +269,9 @@ Object.assign(zh,historyZh,{'History period':'选择历史时期'});
 
 import { artistZh } from './artists.js';
 Object.assign(zh,artistZh,{'Artist selection':'筛选艺术家'});
+
+import { programmeZh } from './zh-programme.js';
+import { catalogueUiZh } from './zh-catalogue-ui.js';
+Object.assign(zh, Object.fromEntries(Object.entries(programmeZh).filter(([key])=>!/^\d+$/.test(key))), catalogueUiZh);
+
+for (const category of ["Screening","Workshop","Guided Tour","Conference","Experience","Lecture & Talk","Exhibition","Project","Performance","Keynote","Networking Event","Meet the Artist","Collection","Open Lab","Panel Discussion","Concert"]) zh[category] = zh[category.toUpperCase()];

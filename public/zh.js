@@ -275,3 +275,6 @@ import { catalogueUiZh } from './zh-catalogue-ui.js';
 Object.assign(zh, Object.fromEntries(Object.entries(programmeZh).filter(([key])=>!/^\d+$/.test(key))), catalogueUiZh);
 
 for (const category of ["Screening","Workshop","Guided Tour","Conference","Experience","Lecture & Talk","Exhibition","Project","Performance","Keynote","Networking Event","Meet the Artist","Collection","Open Lab","Panel Discussion","Concert"]) zh[category] = zh[category.toUpperCase()];
+
+import { todayZh } from './today.js';
+Object.assign(zh,todayZh,{'Open your Saturday route ↗':'打开你的周六路线 ↗','12 Sep · 12:00–18:00 · Bosch + Francisco Carolinum':'9月12日 · 12:00–18:00 · 博斯 + Francisco Carolinum','Saturday route map':'周六路线地图','Saturday itinerary':'周六行程'});

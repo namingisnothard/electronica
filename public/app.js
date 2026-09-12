@@ -1,3 +1,4 @@
+import { todayHTML, mountTodayMap } from './today.js';
 import { calendarEntries, calendarHTML, overlapsDay } from './calendar.js';
 import { artistsHTML } from './artists.js';
 import { historyHTML } from './history.js';
@@ -92,7 +93,7 @@ function openDetail(id,open=true){const pair=sessions.get(Number(id));if(!pair)r
  if(!open)$('#event-detail [data-save]')?.focus();
 }
 function resetFilters(){state={...state,from:0,to:1440,kind:'all',filter:'all',query:'',category:'all',hub:'all',venue:null,limit:30};$('#search').value='';$('#category').value='all';$('#hub').value='all';syncCalendarControls();renderEvents();}
-function nav(view,scroll=true){if(!['explore','plan','food','guide','history','artists'].includes(view))view='explore';state.view=view;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==view+'-view'));document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.nav===view));if(view==='plan')renderPlan();if(view==='food')renderFood();if(view==='guide')renderGuide();if(view==='artists')$('#artists-view').innerHTML=artistsHTML(events,esc);if(view==='history')$('#history-view').innerHTML=historyHTML(esc);if(view==='explore')setTimeout(()=>map?.invalidateSize(),0);history.replaceState(null,'','#'+view);if(scroll)window.scrollTo({top:0,behavior:'smooth'});}
+function nav(view,scroll=true){if(!['explore','plan','food','guide','history','artists','today'].includes(view))view='explore';state.view=view;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==view+'-view'));document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.nav===view));if(view==='today'){if(!$('#today-map'))$('#today-view').innerHTML=todayHTML(events,esc);mountTodayMap();}if(view==='plan')renderPlan();if(view==='food')renderFood();if(view==='guide')renderGuide();if(view==='artists')$('#artists-view').innerHTML=artistsHTML(events,esc);if(view==='history')$('#history-view').innerHTML=historyHTML(esc);if(view==='explore')setTimeout(()=>map?.invalidateSize(),0);history.replaceState(null,'','#'+view);if(scroll)window.scrollTo({top:0,behavior:'smooth'});}
 function stopEvent(stop,day){const e=byPhoto.get(stop.photo);const s=e?.sessions.find(s=>s.day===day);return e&&s?{event:e,session:s}:null;}
 function renderPlan(){const plan=saved.map(x=>({...x,pair:sessions.get(x.sessionId)})).filter(x=>x.pair).sort((a,b)=>a.start.localeCompare(b.start));
  $('#plan-view').innerHTML=`<div class="page-wrap"><div class="page-heading"><div class="eyebrow"><span class="tiny-star">✳</span> THREE DAYS. YOUR OWN RHYTHM.</div><h1>A weekend worth<br>getting lost in<span class="orange">.</span></h1><p>Start with a route through nearby venues, then make it yours. Save events from the map or add a suggested day. Your choices stay on this browser.</p></div>
@@ -156,5 +157,6 @@ $('#event-dialog').addEventListener('click',e=>{if(e.target===$('#event-dialog')
 document.addEventListener('error',e=>{if(e.target.tagName==='IMG'){e.target.style.display='none';e.target.parentElement.style.background='linear-gradient(135deg,#bdcbb4,#758b6d)';}},true);
 
 async function init(){try{const r=await fetch('data/programme.json');if(!r.ok)throw Error('Programme unavailable');data=await r.json();events=data.events;events.forEach(e=>{byId.set(e.id,e);if(e.curation)byPhoto.set(e.curation.photo,e);e.sessions.forEach(s=>sessions.set(s.id,{event:e,session:s}))});saved=saved.filter(x=>sessions.has(x.sessionId)&&typeof x.start==='string'&&Number.isFinite(new Date(x.start).getTime())&&x.duration>0);initMap();renderEvents();persist();nav(location.hash.slice(1)||'explore',false);}catch(e){$('#events').innerHTML='<div class="empty-state">The programme could not load. Refresh the page or <a href="https://festivalplanner.ars.electronica.art/">open the official planner</a>.</div>';console.error(e);}}
+window.addEventListener('hashchange',()=>{if(data)nav(location.hash.slice(1)||'explore',false);});
 setupLanguage();
 init();

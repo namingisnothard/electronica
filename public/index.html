@@ -9,6 +9,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' rx='16' fill='%23ed5b36'/%3E%3Cpath d='M17 15v30h27v-7H25V15z' fill='white'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/leaflet.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="today.css">
   <script defer src="vendor/leaflet.js"></script>
   <script type="module" src="app.js"></script>
 </head>
@@ -17,6 +18,7 @@
     <a class="brand" href="#explore" aria-label="Linz Weekender home"><span class="brandmark">l<span>↗</span></span><span>Linz <b>weekender</b><small>YOUR ARS ELECTRONICA COMPANION</small></span></a>
     <nav aria-label="Main navigation">
       <button data-nav="explore" class="nav active">Explore</button>
+      <button data-nav="today" class="nav">Saturday route</button>
       <button data-nav="plan" class="nav">My weekend <span id="plan-count">0</span></button>
       <button data-nav="food" class="nav">Eat & drink</button>
       <button data-nav="guide" class="nav">Getting around</button>
@@ -31,6 +33,7 @@
       <div><div class="eyebrow"><span class="tiny-star">✳</span> ART. TECHNOLOGY. A WEEKEND OF POSSIBILITIES.</div><h1>A little curiosity.<br>A whole city to explore<span class="orange">.</span></h1><p>Your Friday-to-Sunday guide to Ars Electronica.<br class="mobile-break"> Find your highlights. Make the weekend yours.</p></div>
       <div class="intro-right"><div class="date-stamp"><span>SEPTEMBER</span><strong>11<span>—</span>13</strong><small>FRIDAY → SUNDAY / 2026</small></div><button class="text-button" data-nav="plan">Find your weekend rhythm <span>↗</span></button></div>
     </section>
+    <div class="today-entry"><span>12 Sep · 12:00–18:00 · Bosch + Francisco Carolinum</span><button data-nav="today">Open your Saturday route ↗</button></div>
     <section class="explorer" aria-label="Festival programme and map">
       <div class="explorer-top">
         <div class="day-tabs" role="group" aria-label="Choose a festival day">
@@ -63,6 +66,7 @@
     <section class="bottom-strip"><div><span>01 / GET INSPIRED</span><b>Big ideas. Unexpected places.</b></div><p>650 projects, three days, your own path.<br>Start with our picks, then follow your curiosity.</p><button data-nav="guide">Before you go <span>↗</span></button></section>
   </main>
 
+  <main id="today-view" class="view hidden"></main>
   <main id="plan-view" class="view hidden"></main>
   <main id="food-view" class="view hidden"></main>
   <main id="guide-view" class="view hidden"></main>

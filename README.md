@@ -54,3 +54,7 @@ Artists to know (`#artists`) adds six editorial recommendations (seven artists, 
 ## Calendar view
 
 Choose **Calendar** above the programme, then select Friday, Saturday or Sunday. Search and the existing recommendation, category and venue filters apply to both views. Filter by a time range or session type; the calendar includes every overlapping occurrence, including events continuing from the previous night. Fixed sessions are grouped into half-hour start slots with exact times shown on each card. Flexible opening windows appear in a separate expandable group. All times use Linz local time (CEST). Open a card for details or save it to your weekend.
+
+## Personal Saturday route
+
+Open `#today` or choose **Saturday route** in the navigation. The 12:00–18:00 itinerary follows AEC (including the confirmed 13:00 Bosch booking), Lentos, Francisco Carolinum, and Ursulinenhof. Numbered Leaflet markers connect to venue cards and individual event details. Dotted lines show stop order, with external walking directions for street navigation. The page supports English/Chinese and mobile layouts. `public/downloads/saturday-route.ics` contains the matching visits, lunch, and walking breaks; downloading it does not change bookings or saved weekend selections.

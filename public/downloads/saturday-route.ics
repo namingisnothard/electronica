@@ -1,0 +1,146 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Linz Weekender//Personal day route//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Ars Electronica — Saturday 12–18
+X-WR-TIMEZONE:Europe/Vienna
+BEGIN:VEVENT
+UID:linz-20260912-1@linz-weekender.local
+DTSTAMP:20260912T081407Z
+DTSTART:20260912T100000Z
+DTEND:20260912T101500Z
+SUMMARY:Collect day-pass badge
+LOCATION:Ars Electronica Center\, Ars-Electronica-Straße 1\, 4040 Linz
+DESCRIPTION:Exchange your online day-pass confirmation at the infodesk if n
+ eeded. Bring ID. If you already have the badge\, use this time for Hello W
+ orlds!
+STATUS:TENTATIVE
+TRANSP:OPAQUE
+URL:https://ars.electronica.art/negotiatinghumanity/en/faq/
+END:VEVENT
+BEGIN:VEVENT
+UID:linz-20260912-2@linz-weekender.local
+DTSTAMP:20260912T081407Z
+DTSTART:20260912T101500Z
+DTEND:20260912T104500Z
+SUMMARY:Hello Worlds! — selected works
+LOCATION:Ars Electronica Center\, Level -3
+DESCRIPTION:Start with No Bird and Algorithms in Reflection\; try an intera
+ ctive prototype if time allows. This is a focused sample of the exhibition
+ .
+STATUS:TENTATIVE
+TRANSP:OPAQUE
+URL:https://ars.electronica.art/negotiatinghumanity/en/view/hello-worlds-38
+ 238ddb450c80c9bdc2e6c2b570d674/
+END:VEVENT
+BEGIN:VEVENT
+UID:linz-20260912-3@linz-weekender.local
+DTSTAMP:20260912T081407Z
+DTSTART:20260912T104500Z
+DTEND:20260912T110000Z
+SUMMARY:Deep Space 8K arrival buffer
+LOCATION:Ars Electronica Center\, Level 0\, Deep Space 8K
+DESCRIPTION:Suggested 15-minute buffer. Have your Bosch booking confirmatio
+ n ready\; follow its instructions if earlier arrival is required.
+STATUS:TENTATIVE
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:linz-20260912-4@linz-weekender.local
+DTSTAMP:20260912T081407Z
+DTSTART:20260912T110000Z
+DTEND:20260912T113000Z
+SUMMARY:BOOKED: The Last Judgement Triptych by Hieronymus Bosch
+LOCATION:Ars Electronica Center\, Level 0\, Deep Space 8K
+DESCRIPTION:Existing booking confirmed by you. English presentation of the 
+ gigapixel image. No new booking was made.
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+URL:https://ars.electronica.art/negotiatinghumanity/en/view/the-last-judgem
+ ent-triptych-by-hieronymus-bosch-39238ddb450c814ea5f9f798db70295c/
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:Head to Deep Space 8K for your booked Bosch session
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:linz-20260912-5@linz-weekender.local
+DTSTAMP:20260912T081407Z
+DTSTART:20260912T113000Z
+DTEND:20260912T121000Z
+SUMMARY:Quick lunch and walk to Lentos
+LOCATION:Nibelungen Bridge / Hauptplatz / Lentos Kunstmuseum
+DESCRIPTION:Allow approximately 10–15 minutes to cross the bridge and rea
+ ch Lentos\, plus 25–30 minutes for a quick lunch nearby. Walking allowan
+ ce is an estimate.
+STATUS:TENTATIVE
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:linz-20260912-6@linz-weekender.local
+DTSTAMP:20260912T081407Z
+DTSTART:20260912T121000Z
+DTEND:20260912T133000Z
+SUMMARY:Lentos — Negotiating Humanity
+LOCATION:Lentos Kunstmuseum\, Ernst-Koref-Promenade 1\, 4020 Linz
+DESCRIPTION:Prioritize Mechanical Kurds (watch a complete film cycle)\, CHI
+ MERIA\, and Office for Tree Migration. Ask staff which CHIMERIA components
+  are available to experience. See more prize winners if time permits. Opti
+ onal on-demand 10-minute Intro Session requires no registration.
+STATUS:TENTATIVE
+TRANSP:OPAQUE
+URL:https://ars.electronica.art/negotiatinghumanity/en/view/negotiating-hum
+ anity-34a38ddb450c80b59fb5e33469d2912b/
+END:VEVENT
+BEGIN:VEVENT
+UID:linz-20260912-revised-7@linz-weekender.local
+DTSTAMP:20260912T080000Z
+DTSTART:20260912T133000Z
+DTEND:20260912T134500Z
+SUMMARY:Walk to Francisco Carolinum
+LOCATION:Museumstraße 14\, 4020 Linz
+DESCRIPTION:Allow 15 minutes to walk from Lentos and find the entrance.
+STATUS:TENTATIVE
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:linz-20260912-revised-8@linz-weekender.local
+DTSTAMP:20260912T080000Z
+DTSTART:20260912T134500Z
+DTEND:20260912T144500Z
+SUMMARY:Francisco Carolinum — Ars Electronica Features Exhibition
+LOCATION:Francisco Carolinum\, Museumstraße 14\, 4020 Linz
+DESCRIPTION:Start on level 0 with Open World\, Operation Sunken Sea and Cou
+ nter-Cartographies of Resistance.
+STATUS:TENTATIVE
+TRANSP:OPAQUE
+URL:https://ars.electronica.art/negotiatinghumanity/en/view/ars-electronica
+ -features-exhibition-34a38ddb450c80678731f3394eab291f/
+END:VEVENT
+BEGIN:VEVENT
+UID:linz-20260912-revised-9@linz-weekender.local
+DTSTAMP:20260912T080000Z
+DTSTART:20260912T144500Z
+DTEND:20260912T150000Z
+SUMMARY:Walk to Ursulinenhof / OK Platz
+LOCATION:Ursulinenhof\, Landstraße 31\, 4020 Linz
+DESCRIPTION:Allow 15 minutes for walking and finding the attic exhibition.
+STATUS:TENTATIVE
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:linz-20260912-revised-10@linz-weekender.local
+DTSTAMP:20260912T080000Z
+DTSTART:20260912T150000Z
+DTEND:20260912T160000Z
+SUMMARY:Negotiating Beyond Humanity
+LOCATION:Ursulinenhof\, Attic\, Landstraße 31\, 4020 Linz
+DESCRIPTION:Prioritize Olfactory Biome and Parallel World\; add Entangled L
+ andscape if queues allow. Finish at 18:00.
+STATUS:TENTATIVE
+TRANSP:OPAQUE
+URL:https://ars.electronica.art/negotiatinghumanity/en/view/negotiating-bey
+ ond-humanity-38338ddb450c80b394f8d7c836a5ba35/
+END:VEVENT
+END:VCALENDAR
